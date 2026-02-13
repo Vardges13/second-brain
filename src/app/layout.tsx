@@ -25,14 +25,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
       <body 
-        className={`${geistSans.variable} ${geistMono.variable}`}
-        style={{ margin: 0, padding: 0, fontFamily: 'system-ui, sans-serif', height: '100vh' }}
+        className={`${geistSans.variable} ${geistMono.variable} bg-gray-950 text-gray-100`}
+        style={{ margin: 0, padding: 0, fontFamily: 'system-ui, sans-serif', minHeight: '100vh' }}
       >
-        <div style={{ display: 'flex', height: '100vh' }}>
+        <div className="min-h-screen">
           <Sidebar />
-          <main style={{ flex: 1, marginLeft: 256, overflow: 'auto' }}>
-            <div style={{ padding: '2rem', paddingTop: '1rem' }}>
+          <main className="transition-all duration-300 ease-in-out md:ml-64 ml-0">
+            <div className="p-4 pt-20 md:pt-4 md:p-8">
               {children}
             </div>
           </main>

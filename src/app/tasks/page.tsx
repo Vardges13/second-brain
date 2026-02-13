@@ -54,12 +54,12 @@ export default function TasksPage() {
   };
 
   const TaskCard = ({ task }: { task: Task }) => (
-    <div className="kanban-card group">
+    <div className={`kanban-card group priority-${task.priority}`}>
       <div className="flex items-start justify-between mb-2">
         <h3 className="font-medium text-white text-sm line-clamp-2">
           {task.title}
         </h3>
-        <button className="opacity-0 group-hover:opacity-100 transition-opacity">
+        <button className="opacity-0 group-hover:opacity-100 transition-opacity min-h-6 min-w-6">
           <MoreHorizontal className="h-4 w-4 text-gray-400 hover:text-white" />
         </button>
       </div>
@@ -159,7 +159,7 @@ export default function TasksPage() {
       </div>
 
       {/* Kanban Board */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="kanban-container md:grid md:grid-cols-2 lg:grid-cols-4 md:gap-6">
         {Object.keys(statusConfig).map((status) => (
           <KanbanColumn key={status} status={status as Task['status']} />
         ))}

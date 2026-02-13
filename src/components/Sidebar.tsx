@@ -11,7 +11,7 @@ import {
   Menu,
   X
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const navigation = [
   { name: 'Дашборд', href: '/', icon: BarChart3 },
@@ -24,108 +24,108 @@ const navigation = [
 export default function Sidebar() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
-  const sidebarStyle = {
-    position: 'fixed' as const,
-    top: 0,
-    left: 0,
-    width: '256px',
-    height: '100vh',
-    backgroundColor: '#111827',
-    borderRight: '1px solid #374151',
-    display: 'flex',
-    flexDirection: 'column' as const,
-    zIndex: 40,
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const closeMobileMenu = () => {
+    if (isMobile) {
+      setIsMobileMenuOpen(false);
+    }
   };
 
-  const logoStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '64px',
-    borderBottom: '1px solid #374151',
-    padding: '0 1rem',
-  };
+  // Mobile hamburger button
+  const HamburgerButton = () => (
+    <button
+      className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+      onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+      style={{ minHeight: '44px', minWidth: '44px' }}
+    >
+      {isMobileMenuOpen ? (
+        <X className="h-6 w-6" />
+      ) : (
+        <Menu className="h-6 w-6" />
+      )}
+    </button>
+  );
 
-  const navStyle = {
-    flex: 1,
-    padding: '1.5rem 1rem',
-  };
-
-  const linkStyle = (isActive: boolean) => ({
-    display: 'flex',
-    alignItems: 'center',
-    padding: '0.5rem 0.75rem',
-    fontSize: '0.875rem',
-    fontWeight: 500,
-    borderRadius: '0.375rem',
-    textDecoration: 'none',
-    marginBottom: '0.5rem',
-    transition: 'background-color 0.3s ease',
-    backgroundColor: isActive ? '#3b82f6' : 'transparent',
-    color: isActive ? 'white' : '#d1d5db',
-  });
-
-  const iconStyle = {
-    marginRight: '0.75rem',
-    width: '20px',
-    height: '20px',
-    flexShrink: 0,
-  };
-
-  const footerStyle = {
-    borderTop: '1px solid #374151',
-    padding: '1rem',
-    textAlign: 'center' as const,
-    fontSize: '0.75rem',
-    color: '#9ca3af',
-  };
+  // Backdrop for mobile overlay
+  const Backdrop = () => (
+    isMobileMenuOpen && isMobile ? (
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+        onClick={closeMobileMenu}
+      />
+    ) : null
+  );
 
   return (
-    <div style={sidebarStyle}>
-      {/* Logo */}
-      <div style={logoStyle}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Brain style={{ height: '32px', width: '32px', color: '#3b82f6' }} />
-          <span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'white' }}>
-            Second Brain
+    <>
+      <HamburgerButton />
+      <Backdrop />
+      
+      <aside
+        className={`
+          fixed top-0 left-0 h-full bg-gray-900 border-r border-gray-700 z-40 transition-all duration-300 ease-in-out
+          ${isMobile 
+            ? `w-80 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`
+            : 'w-64 translate-x-0'
+          }
+        `}
+      >
+        {/* Logo */}
+        <div className="h-16 border-b border-gray-700 flex items-center justify-center px-4">
+          <div className="flex items-center gap-3">
+            <Brain className="h-8 w-8 text-indigo-400" />
+            <span className="text-xl font-bold text-white">
+              Second Brain
+            </span>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 p-6">
+          <div className="space-y-2">
+            {navigation.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  onClick={closeMobileMenu}
+                  className={`
+                    flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out
+                    ${isActive 
+                      ? 'bg-indigo-600 text-white shadow-lg' 
+                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                    }
+                  `}
+                  style={{ minHeight: '44px' }}
+                >
+                  <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                  {item.name}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+
+        {/* Footer */}
+        <div className="border-t border-gray-700 p-4 text-center">
+          <span className="text-xs text-gray-400">
+            Система управления знаниями
           </span>
         </div>
-      </div>
-
-      {/* Navigation */}
-      <nav style={navStyle}>
-        {navigation.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              style={linkStyle(isActive)}
-              onMouseEnter={(e) => {
-                if (!isActive) {
-                  e.currentTarget.style.backgroundColor = '#1f2937';
-                  e.currentTarget.style.color = 'white';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isActive) {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = '#d1d5db';
-                }
-              }}
-            >
-              <item.icon style={iconStyle} />
-              {item.name}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* Footer */}
-      <div style={footerStyle}>
-        Система управления знаниями
-      </div>
-    </div>
+      </aside>
+    </>
   );
 }

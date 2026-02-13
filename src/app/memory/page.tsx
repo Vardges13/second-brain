@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Brain, Search, Calendar, Tag } from 'lucide-react';
+import { Brain, Search, Calendar, Tag, ChevronDown, ChevronRight } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { sampleMemories, type MemoryEntry } from '@/lib/data';
 
 export default function MemoryPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedEntry, setSelectedEntry] = useState<MemoryEntry | null>(null);
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
 
   const filteredMemories = sampleMemories.filter(
     entry =>
@@ -28,6 +29,16 @@ export default function MemoryPage() {
       month: 'long',
       day: 'numeric'
     });
+  };
+
+  const toggleCard = (entryId: string) => {
+    const newExpanded = new Set(expandedCards);
+    if (newExpanded.has(entryId)) {
+      newExpanded.delete(entryId);
+    } else {
+      newExpanded.add(entryId);
+    }
+    setExpandedCards(newExpanded);
   };
 
   return (
@@ -52,9 +63,10 @@ export default function MemoryPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Desktop: Split layout */}
+      <div className="hidden md:grid md:grid-cols-3 gap-8">
         {/* Memory List */}
-        <div className="lg:col-span-1 space-y-4">
+        <div className="space-y-4">
           <div className="card">
             <h2 className="text-lg font-semibold text-white mb-4">
               Записи ({sortedMemories.length})
@@ -64,9 +76,9 @@ export default function MemoryPage() {
                 <div
                   key={entry.id}
                   onClick={() => setSelectedEntry(entry)}
-                  className={`p-4 rounded-lg cursor-pointer transition-colors ${
+                  className={`p-4 rounded-lg cursor-pointer transition-all duration-200 ${
                     selectedEntry?.id === entry.id
-                      ? 'bg-blue-900/30 border border-blue-500'
+                      ? 'bg-indigo-900/30 border border-indigo-400'
                       : 'bg-gray-800 hover:bg-gray-700'
                   }`}
                 >
@@ -118,7 +130,7 @@ export default function MemoryPage() {
         </div>
 
         {/* Memory Content */}
-        <div className="lg:col-span-2">
+        <div className="col-span-2">
           {selectedEntry ? (
             <div className="card">
               <div className="border-b border-gray-700 pb-4 mb-6">
@@ -139,7 +151,7 @@ export default function MemoryPage() {
                       <Tag className="h-4 w-4" />
                       <div className="flex space-x-1">
                         {selectedEntry.tags.map((tag) => (
-                          <span key={tag} className="badge bg-blue-900 text-blue-200">
+                          <span key={tag} className="badge bg-indigo-900 text-indigo-200">
                             {tag}
                           </span>
                         ))}
@@ -169,6 +181,82 @@ export default function MemoryPage() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Mobile: Full-width accordion cards */}
+      <div className="md:hidden space-y-4">
+        {sortedMemories.map((entry) => {
+          const isExpanded = expandedCards.has(entry.id);
+          return (
+            <div key={entry.id} className="card">
+              <div
+                onClick={() => toggleCard(entry.id)}
+                className="cursor-pointer flex items-center justify-between"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-semibold text-white text-base line-clamp-2 pr-4">
+                      {entry.title}
+                    </h3>
+                  </div>
+                  
+                  <div className="flex items-center space-x-4 text-sm text-gray-400 mb-3">
+                    <div className="flex items-center space-x-1">
+                      <Calendar className="h-4 w-4" />
+                      <span>{formatDate(entry.date)}</span>
+                    </div>
+                  </div>
+
+                  {!isExpanded && (
+                    <p className="text-sm text-gray-300 line-clamp-3">
+                      {entry.content.replace(/#{1,6}\s+/g, '').substring(0, 150)}...
+                    </p>
+                  )}
+
+                  {entry.tags && entry.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {entry.tags.map((tag) => (
+                        <span key={tag} className="badge bg-indigo-900 text-indigo-200 text-xs">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="ml-4 flex-shrink-0">
+                  {isExpanded ? (
+                    <ChevronDown className="h-5 w-5 text-gray-400" />
+                  ) : (
+                    <ChevronRight className="h-5 w-5 text-gray-400" />
+                  )}
+                </div>
+              </div>
+
+              {isExpanded && (
+                <div className="mt-6 pt-6 border-t border-gray-700">
+                  <div className="prose-dark">
+                    <ReactMarkdown>
+                      {entry.content}
+                    </ReactMarkdown>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+        
+        {sortedMemories.length === 0 && (
+          <div className="card text-center py-8 text-gray-400">
+            <Brain className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p>Записи не найдены</p>
+            {searchQuery && (
+              <p className="text-sm mt-2">
+                Попробуйте изменить поисковый запрос
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

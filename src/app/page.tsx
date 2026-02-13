@@ -16,29 +16,29 @@ export default function Dashboard() {
       name: 'Всего записей',
       value: sampleMemories.length.toString(),
       icon: Brain,
-      color: 'text-blue-400',
-      bgColor: 'bg-blue-900/20',
+      gradient: 'from-blue-500 to-blue-600',
+      bgGradient: 'from-blue-500/10 to-blue-600/5',
     },
     {
       name: 'Документов',
       value: sampleDocuments.length.toString(),
       icon: FileText,
-      color: 'text-green-400',
-      bgColor: 'bg-green-900/20',
+      gradient: 'from-green-500 to-green-600',
+      bgGradient: 'from-green-500/10 to-green-600/5',
     },
     {
       name: 'Активных задач',
       value: activeTasks.length.toString(),
       icon: CheckSquare,
-      color: 'text-yellow-400',
-      bgColor: 'bg-yellow-900/20',
+      gradient: 'from-purple-500 to-purple-600',
+      bgGradient: 'from-purple-500/10 to-purple-600/5',
     },
     {
       name: 'Выполнено',
       value: completedTasks.length.toString(),
       icon: TrendingUp,
-      color: 'text-purple-400',
-      bgColor: 'bg-purple-900/20',
+      gradient: 'from-orange-500 to-orange-600',
+      bgGradient: 'from-orange-500/10 to-orange-600/5',
     },
   ];
 
@@ -51,16 +51,16 @@ export default function Dashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {stats.map((stat) => (
-          <div key={stat.name} className="card">
-            <div className="flex items-center">
-              <div className={`p-3 rounded-lg ${stat.bgColor}`}>
-                <stat.icon className={`h-6 w-6 ${stat.color}`} />
+          <div key={stat.name} className={`card bg-gradient-to-br ${stat.bgGradient} hover:scale-105`}>
+            <div className="flex flex-col items-center text-center space-y-3">
+              <div className={`p-3 rounded-xl bg-gradient-to-r ${stat.gradient} shadow-lg`}>
+                <stat.icon className="h-6 w-6 text-white" />
               </div>
-              <div className="ml-4">
+              <div>
+                <p className="text-2xl font-bold text-white mb-1">{stat.value}</p>
                 <p className="text-sm font-medium text-gray-400">{stat.name}</p>
-                <p className="text-2xl font-bold text-white">{stat.value}</p>
               </div>
             </div>
           </div>

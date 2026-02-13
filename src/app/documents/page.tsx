@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { FileText, Search, Calendar, Tag, Edit, Plus } from 'lucide-react';
+import { FileText, Search, Calendar, Tag, Edit, Plus, ChevronDown, ChevronRight } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { sampleDocuments, type Document } from '@/lib/data';
 
 export default function DocumentsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [expandedDocs, setExpandedDocs] = useState<Set<string>>(new Set());
 
   const filteredDocuments = sampleDocuments.filter(
     doc =>
