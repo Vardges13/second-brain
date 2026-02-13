@@ -5,8 +5,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  basePath: process.env.GITHUB_PAGES ? '/second-brain' : '',
-  assetPrefix: process.env.GITHUB_PAGES ? '/second-brain' : '',
+  basePath: '/second-brain',
+  assetPrefix: '/second-brain',
 };
 
 export default nextConfig;
