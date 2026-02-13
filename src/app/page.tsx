@@ -1,102 +1,145 @@
 'use client';
 
-import { BarChart3, Calendar, CheckSquare, FileText, Brain, Clock, TrendingUp } from 'lucide-react';
 import { sampleMemories, sampleDocuments, sampleTasks } from '@/lib/data';
 import Link from 'next/link';
 
 export default function Dashboard() {
   const recentMemories = sampleMemories.slice(0, 3);
-  const recentDocuments = sampleDocuments.slice(0, 3);
   const activeTasks = sampleTasks.filter(task => task.status !== 'done');
   const completedTasks = sampleTasks.filter(task => task.status === 'done');
   const inProgressTasks = sampleTasks.filter(task => task.status === 'in-progress');
 
   const stats = [
     {
-      name: 'Всего записей',
-      value: sampleMemories.length.toString(),
-      icon: Brain,
-      gradient: 'from-blue-500 to-blue-600',
-      bgGradient: 'from-blue-500/10 to-blue-600/5',
+      name: 'Записей памяти',
+      value: '2',
+      className: 'stat-blue',
     },
     {
       name: 'Документов',
-      value: sampleDocuments.length.toString(),
-      icon: FileText,
-      gradient: 'from-green-500 to-green-600',
-      bgGradient: 'from-green-500/10 to-green-600/5',
+      value: '3',
+      className: 'stat-green',
     },
     {
       name: 'Активных задач',
-      value: activeTasks.length.toString(),
-      icon: CheckSquare,
-      gradient: 'from-purple-500 to-purple-600',
-      bgGradient: 'from-purple-500/10 to-purple-600/5',
+      value: '3',
+      className: 'stat-purple',
     },
     {
       name: 'Выполнено',
-      value: completedTasks.length.toString(),
-      icon: TrendingUp,
-      gradient: 'from-orange-500 to-orange-600',
-      bgGradient: 'from-orange-500/10 to-orange-600/5',
+      value: '2',
+      className: 'stat-orange',
     },
   ];
 
   return (
-    <div className="space-y-8">
+    <div style={{ paddingBottom: '2rem' }}>
       {/* Header */}
-      <div className="flex items-center space-x-3">
-        <BarChart3 className="h-8 w-8 text-blue-400" />
-        <h1 className="text-3xl font-bold text-white">Дашборд</h1>
+      <div style={{ marginBottom: '2rem' }}>
+        <h1 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>
+          📊 Дашборд
+        </h1>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      <div style={{ 
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, 1fr)',
+        gap: '1rem',
+        marginBottom: '2rem'
+      }}>
         {stats.map((stat) => (
-          <div key={stat.name} className={`card bg-gradient-to-br ${stat.bgGradient} hover:scale-105`}>
-            <div className="flex flex-col items-center text-center space-y-3">
-              <div className={`p-3 rounded-xl bg-gradient-to-r ${stat.gradient} shadow-lg`}>
-                <stat.icon className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-white mb-1">{stat.value}</p>
-                <p className="text-sm font-medium text-gray-400">{stat.name}</p>
-              </div>
-            </div>
+          <div key={stat.name} className={`stat-card ${stat.className}`}>
+            <div className="stat-number">{stat.value}</div>
+            <div className="stat-label">{stat.name}</div>
           </div>
         ))}
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Recent Memories */}
+      {/* Main Content */}
+      <div style={{ 
+        display: 'grid',
+        gridTemplateColumns: '1fr',
+        gap: '1.5rem'
+      }}>
+        {/* Последние записи */}
         <div className="card">
-          <div className="card-header">
-            <h2 className="text-xl font-semibold text-white flex items-center">
-              <Brain className="h-5 w-5 mr-2 text-blue-400" />
-              Последние записи памяти
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            marginBottom: '1rem' 
+          }}>
+            <h2 style={{ 
+              fontSize: '1.2rem', 
+              fontWeight: '600', 
+              color: 'var(--text-primary)',
+              margin: 0,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              🧠 Последние записи
             </h2>
             <Link 
               href="/memory"
-              className="text-blue-400 hover:text-blue-300 text-sm font-medium"
+              style={{ 
+                color: 'var(--accent-blue)', 
+                textDecoration: 'none',
+                fontSize: '0.9rem',
+                fontWeight: '500'
+              }}
             >
               Все записи →
             </Link>
           </div>
-          <div className="space-y-4">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {recentMemories.map((memory) => (
-              <div key={memory.id} className="border-l-2 border-blue-500 pl-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-medium text-white">{memory.title}</h3>
-                  <span className="text-xs text-gray-400">{memory.date}</span>
+              <div 
+                key={memory.id} 
+                style={{
+                  borderLeft: '3px solid var(--accent-blue)',
+                  paddingLeft: '1rem',
+                  padding: '0.75rem 0 0.75rem 1rem'
+                }}
+              >
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                  marginBottom: '0.25rem'
+                }}>
+                  <h3 style={{ 
+                    fontSize: '1rem', 
+                    fontWeight: '600',
+                    color: 'var(--text-primary)',
+                    margin: 0,
+                    lineHeight: '1.3'
+                  }}>
+                    {memory.title}
+                  </h3>
+                  <span style={{ 
+                    fontSize: '0.8rem', 
+                    color: 'var(--text-muted)',
+                    fontWeight: '500',
+                    whiteSpace: 'nowrap',
+                    marginLeft: '1rem'
+                  }}>
+                    {memory.date}
+                  </span>
                 </div>
-                <p className="text-sm text-gray-300 mt-1 line-clamp-2">
+                <p style={{ 
+                  fontSize: '0.85rem', 
+                  color: 'var(--text-secondary)',
+                  lineHeight: '1.5',
+                  margin: '0 0 0.5rem 0'
+                }}>
                   {memory.content.substring(0, 120)}...
                 </p>
                 {memory.tags && (
-                  <div className="flex space-x-2 mt-2">
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                     {memory.tags.slice(0, 2).map((tag) => (
-                      <span key={tag} className="badge bg-blue-900 text-blue-200">
+                      <span key={tag} className="badge badge-blue">
                         {tag}
                       </span>
                     ))}
@@ -107,115 +150,112 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Active Tasks */}
+        {/* Активные задачи */}
         <div className="card">
-          <div className="card-header">
-            <h2 className="text-xl font-semibold text-white flex items-center">
-              <CheckSquare className="h-5 w-5 mr-2 text-yellow-400" />
-              Активные задачи
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            marginBottom: '1rem' 
+          }}>
+            <h2 style={{ 
+              fontSize: '1.2rem', 
+              fontWeight: '600', 
+              color: 'var(--text-primary)',
+              margin: 0,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              ✅ Активные задачи
             </h2>
             <Link 
               href="/tasks"
-              className="text-yellow-400 hover:text-yellow-300 text-sm font-medium"
+              style={{ 
+                color: 'var(--accent-purple)', 
+                textDecoration: 'none',
+                fontSize: '0.9rem',
+                fontWeight: '500'
+              }}
             >
               Канбан →
             </Link>
           </div>
-          <div className="space-y-3">
-            {inProgressTasks.map((task) => (
-              <div key={task.id} className="flex items-center justify-between p-3 bg-gray-800 rounded-md">
-                <div className="flex-1">
-                  <h3 className="font-medium text-white">{task.title}</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {activeTasks.slice(0, 4).map((task) => (
+              <div 
+                key={task.id} 
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '0.75rem',
+                  background: '#f8fafc',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border)'
+                }}
+              >
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ 
+                    fontSize: '0.9rem', 
+                    fontWeight: '600',
+                    color: 'var(--text-primary)',
+                    margin: '0 0 0.25rem 0'
+                  }}>
+                    {task.title}
+                  </h3>
                   {task.description && (
-                    <p className="text-sm text-gray-400 mt-1">{task.description}</p>
+                    <p style={{ 
+                      fontSize: '0.8rem', 
+                      color: 'var(--text-secondary)',
+                      margin: 0,
+                      lineHeight: '1.4'
+                    }}>
+                      {task.description}
+                    </p>
                   )}
                 </div>
-                <div className="flex items-center space-x-2">
-                  <span className={`badge-${task.priority}`}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span className={`badge badge-${task.priority}`}>
                     {task.priority === 'high' ? 'Высокий' : 
                      task.priority === 'medium' ? 'Средний' : 'Низкий'}
                   </span>
-                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <div style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    background: task.status === 'in-progress' ? '#f59e0b' : 
+                               task.status === 'todo' ? '#3b82f6' : '#64748b'
+                  }}></div>
                 </div>
               </div>
             ))}
-            {inProgressTasks.length === 0 && (
-              <p className="text-gray-400 text-sm italic">Нет задач в работе</p>
+            {activeTasks.length === 0 && (
+              <p style={{ 
+                color: 'var(--text-muted)', 
+                fontSize: '0.9rem',
+                fontStyle: 'italic',
+                textAlign: 'center',
+                padding: '1rem 0',
+                margin: 0
+              }}>
+                Нет активных задач
+              </p>
             )}
           </div>
         </div>
-
-        {/* Recent Documents */}
-        <div className="card">
-          <div className="card-header">
-            <h2 className="text-xl font-semibold text-white flex items-center">
-              <FileText className="h-5 w-5 mr-2 text-green-400" />
-              Последние документы
-            </h2>
-            <Link 
-              href="/documents"
-              className="text-green-400 hover:text-green-300 text-sm font-medium"
-            >
-              Все документы →
-            </Link>
-          </div>
-          <div className="space-y-4">
-            {recentDocuments.map((doc) => (
-              <div key={doc.id} className="border-l-2 border-green-500 pl-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-medium text-white">{doc.title}</h3>
-                  <span className="text-xs text-gray-400">{doc.createdAt}</span>
-                </div>
-                <p className="text-sm text-gray-300 mt-1 line-clamp-2">
-                  {doc.content.substring(0, 120)}...
-                </p>
-                {doc.tags && (
-                  <div className="flex space-x-2 mt-2">
-                    {doc.tags.slice(0, 2).map((tag) => (
-                      <span key={tag} className="badge bg-green-900 text-green-200">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="card">
-          <div className="card-header">
-            <h2 className="text-xl font-semibold text-white flex items-center">
-              <Clock className="h-5 w-5 mr-2 text-purple-400" />
-              Быстрые действия
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 gap-3">
-            <Link 
-              href="/memory"
-              className="flex items-center p-3 bg-gray-800 hover:bg-gray-700 rounded-md transition-colors group"
-            >
-              <Brain className="h-5 w-5 text-blue-400 mr-3" />
-              <span className="text-white group-hover:text-blue-300">Новая запись памяти</span>
-            </Link>
-            <Link 
-              href="/documents"
-              className="flex items-center p-3 bg-gray-800 hover:bg-gray-700 rounded-md transition-colors group"
-            >
-              <FileText className="h-5 w-5 text-green-400 mr-3" />
-              <span className="text-white group-hover:text-green-300">Создать документ</span>
-            </Link>
-            <Link 
-              href="/tasks"
-              className="flex items-center p-3 bg-gray-800 hover:bg-gray-700 rounded-md transition-colors group"
-            >
-              <CheckSquare className="h-5 w-5 text-yellow-400 mr-3" />
-              <span className="text-white group-hover:text-yellow-300">Добавить задачу</span>
-            </Link>
-          </div>
-        </div>
       </div>
+
+      <style jsx>{`
+        @media (min-width: 768px) {
+          .stats-grid {
+            grid-template-columns: repeat(4, 1fr) !important;
+          }
+          .content-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

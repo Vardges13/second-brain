@@ -1,201 +1,266 @@
 'use client';
 
 import { useState } from 'react';
-import { FileText, Search, Calendar, Tag, Edit, Plus, ChevronDown, ChevronRight } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import { sampleDocuments, type Document } from '@/lib/data';
+import { Search } from 'lucide-react';
+import { sampleDocuments } from '@/lib/data';
 
 export default function DocumentsPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
-  const [expandedDocs, setExpandedDocs] = useState<Set<string>>(new Set());
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
 
   const filteredDocuments = sampleDocuments.filter(
-    doc =>
+    doc => 
       doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       doc.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
       doc.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  const sortedDocuments = filteredDocuments.sort((a, b) => 
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
-  const getDocumentPreview = (content: string) => {
-    // Remove markdown headers and get first paragraph
-    return content
-      .replace(/#{1,6}\s+/g, '')
-      .split('\n\n')[0]
-      .substring(0, 200);
+  const toggleCard = (id: string) => {
+    const newExpanded = new Set(expandedCards);
+    if (expandedCards.has(id)) {
+      newExpanded.delete(id);
+    } else {
+      newExpanded.add(id);
+    }
+    setExpandedCards(newExpanded);
   };
 
   return (
-    <div className="space-y-6">
+    <div>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-        <div className="flex items-center space-x-3">
-          <FileText className="h-8 w-8 text-green-400" />
-          <h1 className="text-3xl font-bold text-white">Документы</h1>
-        </div>
-
-        <div className="flex items-center space-x-3">
-          {/* Search */}
-          <div className="relative">
-            <Search className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Поиск документов..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="input-field pl-10 w-full sm:w-80"
-            />
-          </div>
-
-          {/* Add Document Button */}
-          <button className="btn-primary flex items-center space-x-2">
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Создать</span>
-          </button>
+      <div style={{ marginBottom: '2rem' }}>
+        <h1 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--text-primary)', margin: '0 0 1.5rem 0' }}>
+          📄 Документы
+        </h1>
+        
+        {/* Search Bar */}
+        <div style={{ position: 'relative', maxWidth: '600px' }}>
+          <Search 
+            style={{ 
+              position: 'absolute', 
+              left: '1rem', 
+              top: '50%', 
+              transform: 'translateY(-50%)',
+              width: '20px',
+              height: '20px',
+              color: 'var(--text-muted)'
+            }} 
+          />
+          <input
+            type="text"
+            placeholder="Поиск документов..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="input-field"
+            style={{ paddingLeft: '3rem' }}
+          />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Documents List */}
-        <div className="lg:col-span-1 space-y-4">
-          <div className="card">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white">
-                Документы ({sortedDocuments.length})
-              </h2>
-            </div>
-            
-            <div className="space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto">
-              {sortedDocuments.map((doc) => (
-                <div
-                  key={doc.id}
-                  onClick={() => setSelectedDocument(doc)}
-                  className={`p-4 rounded-lg cursor-pointer transition-colors ${
-                    selectedDocument?.id === doc.id
-                      ? 'bg-green-900/30 border border-green-500'
-                      : 'bg-gray-800 hover:bg-gray-700'
-                  }`}
+      {/* Desktop Table View */}
+      <div style={{ display: 'none' }} className="hidden md:block">
+        <div className="table-wrap">
+          {filteredDocuments.map((doc, index) => {
+            const isExpanded = expandedCards.has(doc.id);
+            return (
+              <div key={doc.id}>
+                <div 
+                  className="table-row"
+                  onClick={() => toggleCard(doc.id)}
+                  style={{ cursor: 'pointer' }}
                 >
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-medium text-white text-sm">
+                  <div style={{ flex: '2' }}>
+                    <h3 style={{ 
+                      fontSize: '1rem', 
+                      fontWeight: '600',
+                      color: 'var(--text-primary)',
+                      margin: '0 0 0.25rem 0'
+                    }}>
                       {doc.title}
                     </h3>
-                    <Edit className="h-4 w-4 text-gray-400 flex-shrink-0 ml-2" />
-                  </div>
-                  
-                  <p className="text-xs text-gray-400 mb-2">
-                    {formatDate(doc.createdAt)}
-                  </p>
-                  
-                  <p className="text-sm text-gray-300 line-clamp-3">
-                    {getDocumentPreview(doc.content)}...
-                  </p>
-                  
-                  {doc.tags && doc.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-3">
-                      {doc.tags.slice(0, 3).map((tag) => (
-                        <span key={tag} className="badge bg-green-900 text-green-200 text-xs">
-                          {tag}
-                        </span>
-                      ))}
-                      {doc.tags.length > 3 && (
-                        <span className="text-xs text-gray-400">
-                          +{doc.tags.length - 3}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
-              
-              {sortedDocuments.length === 0 && (
-                <div className="text-center py-8 text-gray-400">
-                  <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Документы не найдены</p>
-                  {searchQuery && (
-                    <p className="text-sm mt-2">
-                      Попробуйте изменить поисковый запрос
+                    <p style={{ 
+                      fontSize: '0.85rem', 
+                      color: 'var(--text-secondary)',
+                      margin: 0
+                    }}>
+                      {doc.content.substring(0, 100)}...
                     </p>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Document Content */}
-        <div className="lg:col-span-2">
-          {selectedDocument ? (
-            <div className="card">
-              <div className="border-b border-gray-700 pb-4 mb-6">
-                <div className="flex items-start justify-between mb-3">
-                  <h1 className="text-2xl font-bold text-white">
-                    {selectedDocument.title}
-                  </h1>
-                  <button className="btn-secondary flex items-center space-x-2">
-                    <Edit className="h-4 w-4" />
-                    <span>Редактировать</span>
-                  </button>
-                </div>
-                
-                <div className="flex items-center space-x-4 text-sm text-gray-400">
-                  <div className="flex items-center space-x-1">
-                    <Calendar className="h-4 w-4" />
-                    <span>Создан {formatDate(selectedDocument.createdAt)}</span>
                   </div>
                   
-                  {selectedDocument.tags && selectedDocument.tags.length > 0 && (
-                    <div className="flex items-center space-x-1">
-                      <Tag className="h-4 w-4" />
-                      <div className="flex space-x-1">
-                        {selectedDocument.tags.map((tag) => (
-                          <span key={tag} className="badge bg-green-900 text-green-200">
+                  <div style={{ flex: '1' }}>
+                    <span style={{ 
+                      fontSize: '0.85rem', 
+                      color: 'var(--text-muted)',
+                      fontWeight: '500'
+                    }}>
+                      {new Date(doc.createdAt).toLocaleDateString('ru-RU')}
+                    </span>
+                  </div>
+                  
+                  <div style={{ flex: '1' }}>
+                    {doc.tags && (
+                      <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
+                        {doc.tags.slice(0, 2).map((tag) => (
+                          <span key={tag} className="badge badge-green">
                             {tag}
                           </span>
                         ))}
                       </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+                    )}
+                  </div>
 
-              <div className="prose-dark">
-                <ReactMarkdown>
-                  {selectedDocument.content}
-                </ReactMarkdown>
+                  <div style={{ marginLeft: '0.5rem' }}>
+                    <svg 
+                      style={{
+                        width: '16px',
+                        height: '16px',
+                        color: 'var(--text-muted)',
+                        transition: 'transform 0.2s',
+                        transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
+                      }}
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+
+                {isExpanded && (
+                  <div style={{
+                    padding: '1.5rem',
+                    background: '#f8fafc',
+                    borderTop: '1px solid var(--border)'
+                  }}>
+                    <div 
+                      className="prose"
+                      style={{ 
+                        fontSize: '0.9rem',
+                        lineHeight: '1.6',
+                        whiteSpace: 'pre-wrap'
+                      }}
+                    >
+                      {doc.content}
+                    </div>
+                    {doc.tags && doc.tags.length > 2 && (
+                      <div style={{ 
+                        display: 'flex', 
+                        gap: '0.5rem', 
+                        flexWrap: 'wrap',
+                        marginTop: '1rem'
+                      }}>
+                        {doc.tags.map((tag) => (
+                          <span key={tag} className="badge badge-green">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
-            </div>
-          ) : (
-            <div className="card">
-              <div className="text-center py-12">
-                <FileText className="h-16 w-16 mx-auto mb-6 text-gray-600" />
-                <h2 className="text-xl font-semibold text-gray-400 mb-2">
-                  Выберите документ для просмотра
-                </h2>
-                <p className="text-gray-500 mb-6">
-                  Кликните на любой документ из списка слева, чтобы посмотреть его содержимое
-                </p>
-                <button className="btn-primary flex items-center space-x-2 mx-auto">
-                  <Plus className="h-4 w-4" />
-                  <span>Создать новый документ</span>
-                </button>
-              </div>
-            </div>
-          )}
+            );
+          })}
         </div>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="block md:hidden">
+        {filteredDocuments.map((doc) => {
+          const isExpanded = expandedCards.has(doc.id);
+          return (
+            <div
+              key={doc.id}
+              className="entry-card"
+              onClick={() => toggleCard(doc.id)}
+            >
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'flex-start',
+                marginBottom: '0.5rem'
+              }}>
+                <span className="badge badge-green entry-date">
+                  {new Date(doc.createdAt).toLocaleDateString('ru-RU')}
+                </span>
+                <svg 
+                  style={{
+                    width: '16px',
+                    height: '16px',
+                    color: 'var(--text-muted)',
+                    transition: 'transform 0.2s',
+                    transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
+                  }}
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+              
+              <h3 className="entry-title">{doc.title}</h3>
+              
+              {!isExpanded && (
+                <p className="entry-preview">
+                  {doc.content.length > 150 
+                    ? doc.content.substring(0, 150) + '...'
+                    : doc.content
+                  }
+                </p>
+              )}
+
+              {isExpanded && (
+                <div style={{ 
+                  marginTop: '1rem',
+                  padding: '1rem',
+                  background: '#f8fafc',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border)'
+                }}>
+                  <div 
+                    className="prose"
+                    style={{ 
+                      fontSize: '0.9rem',
+                      lineHeight: '1.6',
+                      whiteSpace: 'pre-wrap'
+                    }}
+                  >
+                    {doc.content}
+                  </div>
+                </div>
+              )}
+              
+              {doc.tags && doc.tags.length > 0 && (
+                <div style={{ 
+                  display: 'flex', 
+                  gap: '0.5rem', 
+                  flexWrap: 'wrap',
+                  marginTop: '0.75rem'
+                }}>
+                  {doc.tags.map((tag) => (
+                    <span key={tag} className="badge badge-green">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+        
+        {filteredDocuments.length === 0 && (
+          <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
+            <p style={{ 
+              color: 'var(--text-muted)', 
+              fontSize: '1rem',
+              margin: 0
+            }}>
+              {searchQuery ? 'Документы не найдены' : 'Нет документов'}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
